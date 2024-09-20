@@ -1,7 +1,3 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
-
 { config, pkgs, ... }:
 
 {
@@ -9,28 +5,26 @@
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
     ];
+  
+  ## Network stuff
+  # Setting hostname
+  networking.hostName = "IEEE-MinecraftKiosk"; # Define your hostname.
 
-  # Bootloader.
+  # Enable networkmanager
+  networking.networkmanager.enable = true;
+
+  ## Bootloader DON'T TOUCH UNLESS YOU KNOW WHAT YOU ARE DOING
   boot.loader.grub.enable = true;
   boot.loader.grub.device = "/dev/vda";
   boot.loader.grub.useOSProber = true;
+  boot.loader.timeout = 1;
 
-  networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-  # Configure network proxy if necessary
-  # networking.proxy.default = "http://user:password@proxy:port/";
-  # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
+  ## Localization
   # Set your time zone.
   time.timeZone = "America/Denver";
 
   # Select internationalisation properties.
   i18n.defaultLocale = "en_US.UTF-8";
-
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
@@ -49,74 +43,65 @@
     variant = "";
   };
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.zrm = {
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
+
+  ## Users
+  # User to modify the box
+  users.users.ieee = {
     isNormalUser = true;
-    description = "zrm";
+    description = "ieee";
     extraGroups = [ "networkmanager" "wheel" "mc" ];
-    packages = with pkgs; [];
+    # Minecraft user doesn't need these
+    packages = with pkgs; [
+  	git
+	wget
+	kitty
+	neovim
+    ];
   };
 
+  # User that handles minecraft process
   users.users.minecraft = {
   	isNormalUser = true;
 	home = "/home/minecraft";
 	extraGroups = ["wheel"];
   };
 
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
-
-  # List packages installed in system profile. To search, run:
-  # $ nix search wget
-  environment.systemPackages = with pkgs; [
-  	git
-	wget
-	kitty
-	neovim
-	firefox
-	prismlauncher
-  ];
-
-  # Kiosk time
-  services.cage = {
-  	enable = true;
-	user = "minecraft";
-	program = "/home/minecraft/test.sh";
-  };
-
   # sudo modification to shutdown
   security.sudo = {
   	enable = true;
 	extraRules = [{
-		commands = [ {
-			command = "/run/current-system/sw/bin/poweroff";
-			options = [ "NOPASSWD" ];
-			}
+		commands = [ 
+			{command = "/run/current-system/sw/bin/poweroff"; options = [ "NOPASSWD" ];}
 		];
 		groups = ["wheel"];
-
 	}];
   };
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
+  ## Packages
+  # List packages installed in system profile.
+  environment.systemPackages = with pkgs; [
+	firefox
+	prismlauncher
+  ];
 
-  # List services that you want to enable:
 
+
+  ## Services
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
+  # Kiosk window mangaer
+  services.cage = {
+  	enable = true;
+	user = "minecraft";
+	program = "/home/minecraft/startup.sh";
+  };
 
+
+
+  ## DON'T TOUCH THIS
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. It‘s perfectly fine and recommended to leave
