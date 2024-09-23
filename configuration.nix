@@ -47,7 +47,6 @@
   nixpkgs.config.allowUnfree = true;
 
   ## Users
-  # User to modify the box REMEMBER TO CHANGE TO ieee
   users.users.ieee = {
     isNormalUser = true;
     description = "ieee";
