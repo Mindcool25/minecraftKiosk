@@ -47,18 +47,12 @@
   nixpkgs.config.allowUnfree = true;
 
   ## Users
-  # User to modify the box
+  # User to modify the box REMEMBER TO CHANGE TO ieee
   users.users.ieee = {
     isNormalUser = true;
     description = "ieee";
     extraGroups = [ "networkmanager" "wheel" "mc" ];
-    # Minecraft user doesn't need these
-    packages = with pkgs; [
-  	git
-	wget
-	kitty
-	neovim
-    ];
+    packages = with pkgs; [];
   };
 
   # User that handles minecraft process
@@ -80,8 +74,13 @@
   };
 
   ## Packages
-  # List packages installed in system profile.
+  # List packages installed in system profile. To search, run:
+  # $ nix search wget
   environment.systemPackages = with pkgs; [
+  	git
+	wget
+	kitty
+	neovim
 	firefox
 	prismlauncher
   ];
@@ -90,13 +89,27 @@
 
   ## Services
   # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+  services.openssh = {
+	  enable = true;
+	  settings = {
+	  	AllowUsers = ["ieee"];
+		PermitRootLogin = "no";
+		X11Forwarding = false;
+	  };
+  };
 
-  # Kiosk window mangaer
-  services.cage = {
+  # Kiosk through BSPWM
+  services.xserver = {
   	enable = true;
-	user = "minecraft";
-	program = "/home/minecraft/startup.sh";
+	windowManager.bspwm.enable = true;
+	displayManager = {
+		defaultSession = "none+bspwm";
+		lightdm = {
+			enable = true;
+			autoLogin.enable = true;
+			autoLogin.user = "minecraft";
+		};
+	};
   };
 
 
