@@ -47,9 +47,10 @@
   nixpkgs.config.allowUnfree = true;
 
   ## Users
+  # User to modify the box REMEMBER TO CHANGE TO ieee
   users.users.ieee = {
     isNormalUser = true;
-    description = "ieee";
+    description = "iee";
     extraGroups = [ "networkmanager" "wheel" "mc" ];
     packages = with pkgs; [];
   };
@@ -91,16 +92,26 @@
   services.openssh = {
 	  enable = true;
 	  settings = {
-	  	AllowUsers = ["ieee"];
-		PermitRootLogin = "no";
+	  	AllowUsers = ["zrm"];
 		X11Forwarding = false;
+		PermitRootLogin = "no";
 	  };
   };
 
-  # Kiosk through BSPWM
   services.xserver = {
   	enable = true;
-	windowManager.bspwm.enable = true;
+	windowManager.bspwm = {
+		enable = true;
+		configFile = pkgs.writeShellScript "bspwmrc"
+		''
+			#! /bin/sh
+			bspc monitor -d I
+			bspc config border_width 2
+			bspc config window_gap 12
+			setxkbmap -option srvrkeys:none
+			prismlauncher -l 1.16.5
+		'';
+	};
 	displayManager = {
 		defaultSession = "none+bspwm";
 		lightdm = {
