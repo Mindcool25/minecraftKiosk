@@ -92,7 +92,7 @@
   services.openssh = {
 	  enable = true;
 	  settings = {
-	  	AllowUsers = ["zrm"];
+	  	AllowUsers = ["ieee"];
 		X11Forwarding = false;
 		PermitRootLogin = "no";
 	  };
